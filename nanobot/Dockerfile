@@ -8,7 +8,7 @@ ENV UV_PROJECT_ENVIRONMENT=/opt/app/.venv
 
 WORKDIR /opt/app
 
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
 
 COPY backend/ ./backend/
 COPY mcp/mcp-tasks/ ./mcp/mcp-tasks/
