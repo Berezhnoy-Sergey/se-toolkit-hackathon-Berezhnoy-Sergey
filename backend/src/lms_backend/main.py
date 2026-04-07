@@ -5,14 +5,14 @@ import time
 import traceback
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
-from lms_backend.auth import verify_api_key
-from lms_backend.routers import tasks
+from lms_backend.database import create_db_and_tables
+from lms_backend.routers import auth, tasks
 from lms_backend.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from lms_backend.database import create_db_and_tables
     create_db_and_tables()
     logging.getLogger("uvicorn.access").propagate = True
     yield
@@ -30,7 +29,7 @@ app = FastAPI(
     title=settings.app_name,
     debug=settings.debug,
     description="AI-Powered Personal Task Manager API",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -62,7 +61,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(
-    tasks.router,
-    dependencies=[Depends(verify_api_key)],
-)
+# Include routers
+app.include_router(auth.router)
+app.include_router(tasks.router)

@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
+from lms_backend.auth import verify_token
 from lms_backend.database import engine
 from lms_backend.models.task import Task, TaskCreate, TaskRead, TaskUpdate
 
@@ -12,10 +13,11 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 
 @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
-def create_task(task_data: TaskCreate):
+def create_task(task_data: TaskCreate, user_id: int = Depends(verify_token)):
     """Create a new task."""
     with Session(engine) as session:
         task = Task(
+            user_id=user_id,
             title=task_data.title,
             description=task_data.description,
             priority=task_data.priority,
@@ -30,10 +32,10 @@ def create_task(task_data: TaskCreate):
 
 
 @router.get("/", response_model=list[TaskRead])
-def list_tasks(status_filter: str | None = None):
-    """List all tasks, optionally filtered by status."""
+def list_tasks(status_filter: str | None = None, user_id: int = Depends(verify_token)):
+    """List all tasks for current user, optionally filtered by status."""
     with Session(engine) as session:
-        query = select(Task)
+        query = select(Task).where(Task.user_id == user_id)
         if status_filter:
             query = query.where(Task.status == status_filter)
         query = query.order_by(Task.created_at.desc())
@@ -42,20 +44,24 @@ def list_tasks(status_filter: str | None = None):
 
 
 @router.get("/{task_id}", response_model=TaskRead)
-def get_task(task_id: int):
-    """Get a specific task by ID."""
+def get_task(task_id: int, user_id: int = Depends(verify_token)):
+    """Get a specific task by ID (only if owned by user)."""
     with Session(engine) as session:
-        task = session.get(Task, task_id)
+        task = session.exec(
+            select(Task).where(Task.id == task_id, Task.user_id == user_id)
+        ).first()
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         return task
 
 
 @router.patch("/{task_id}", response_model=TaskRead)
-def update_task(task_id: int, task_data: TaskUpdate):
-    """Update a task."""
+def update_task(task_id: int, task_data: TaskUpdate, user_id: int = Depends(verify_token)):
+    """Update a task (only if owned by user)."""
     with Session(engine) as session:
-        task = session.get(Task, task_id)
+        task = session.exec(
+            select(Task).where(Task.id == task_id, Task.user_id == user_id)
+        ).first()
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
 
@@ -73,10 +79,12 @@ def update_task(task_id: int, task_data: TaskUpdate):
 
 
 @router.post("/{task_id}/complete", response_model=TaskRead)
-def complete_task(task_id: int):
-    """Mark a task as complete."""
+def complete_task(task_id: int, user_id: int = Depends(verify_token)):
+    """Mark a task as complete (only if owned by user)."""
     with Session(engine) as session:
-        task = session.get(Task, task_id)
+        task = session.exec(
+            select(Task).where(Task.id == task_id, Task.user_id == user_id)
+        ).first()
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
 
@@ -89,10 +97,12 @@ def complete_task(task_id: int):
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int):
-    """Delete a task."""
+def delete_task(task_id: int, user_id: int = Depends(verify_token)):
+    """Delete a task (only if owned by user)."""
     with Session(engine) as session:
-        task = session.get(Task, task_id)
+        task = session.exec(
+            select(Task).where(Task.id == task_id, Task.user_id == user_id)
+        ).first()
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         session.delete(task)

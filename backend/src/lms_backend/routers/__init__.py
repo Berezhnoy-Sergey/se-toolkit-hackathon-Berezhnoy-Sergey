@@ -1,3 +1,3 @@
-from lms_backend.routers import tasks
+from lms_backend.routers import auth, tasks
 
-__all__ = ["tasks"]
+__all__ = ["auth", "tasks"]

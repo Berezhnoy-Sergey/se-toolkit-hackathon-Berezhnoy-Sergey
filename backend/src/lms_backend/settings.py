@@ -11,15 +11,15 @@ class Settings(BaseSettings):
     address: str = "0.0.0.0"
     port: int = 8000
     
-    # API key (simple version)
-    api_key: str = "taskflow_api_key_change_this"
-    
     # CORS
     cors_origins: list[str] = ["*"]
     
+    # JWT Secret (change in production!)
+    jwt_secret_key: str = "your-secret-key-change-in-production"
+    
     # Database
     db_url: str = Field(
-        default="postgresql://taskflow:taskflow_password@postgres:5432/taskflow",
+        default="postgresql://taskflow:taskflow_password@localhost:5432/taskflow",
         alias="DATABASE_URL"
     )
 

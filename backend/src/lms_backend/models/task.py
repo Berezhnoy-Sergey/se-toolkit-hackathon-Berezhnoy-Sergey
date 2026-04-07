@@ -11,6 +11,7 @@ class Task(SQLModel, table=True):
     __tablename__ = "task"
 
     id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
     title: str = Field(max_length=255)
     description: str = Field(default="", max_length=2000)
     status: str = Field(default="active", max_length=20)  # active, completed
@@ -33,6 +34,7 @@ class TaskRead(SQLModel):
     """Schema for reading a task (response)."""
 
     id: int
+    user_id: int
     title: str
     description: str
     status: str
