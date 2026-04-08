@@ -49,6 +49,19 @@
                 <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
 
+            <!-- Create Task Form -->
+            <div class="create-task-form">
+                <input type="text" id="task-title" placeholder="Task title" required />
+                <textarea id="task-description" placeholder="Description (optional)"></textarea>
+                <select id="task-priority">
+                    <option value="0">No Priority</option>
+                    <option value="1">Low Priority</option>
+                    <option value="2">Medium Priority</option>
+                    <option value="3">High Priority</option>
+                </select>
+                <button id="create-task-btn" onclick="handleCreateTask()">Add Task</button>
+            </div>
+
             <!-- Filter Buttons -->
             <div id="filter-buttons" class="filter-bar">
                 <button id="filter-all" class="filter-btn active" onclick="setFilter('all')">All</button>

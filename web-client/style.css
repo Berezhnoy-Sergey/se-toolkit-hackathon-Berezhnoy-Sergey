@@ -276,6 +276,55 @@ button:hover {
     background: #e53e3e;
 }
 
+/* Create Task Form */
+.create-task-form {
+    background: #f7f8fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.create-task-form input,
+.create-task-form textarea,
+.create-task-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.create-task-form textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.create-task-form input:focus,
+.create-task-form textarea:focus,
+.create-task-form select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#create-task-btn {
+    width: 100%;
+    padding: 10px;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#create-task-btn:hover {
+    background: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+}
+
 /* Task Actions */
 
 .task-list {

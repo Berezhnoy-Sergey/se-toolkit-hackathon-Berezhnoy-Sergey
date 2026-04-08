@@ -235,7 +235,12 @@ async function handleDeleteTask(taskId) {
 // Event listeners
 document.getElementById('refresh-tasks').addEventListener('click', loadTasks);
 
-// Enter key support
+// Enter key support for task creation
+document.getElementById('task-title').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleCreateTask();
+});
+
+// Enter key support for auth
 document.getElementById('login-password').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('login-btn').click();
 });
