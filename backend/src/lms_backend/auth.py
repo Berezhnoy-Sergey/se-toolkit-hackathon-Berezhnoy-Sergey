@@ -3,7 +3,8 @@
 from datetime import datetime, timedelta
 
 import bcrypt
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
 from lms_backend.settings import settings
@@ -12,6 +13,9 @@ from lms_backend.settings import settings
 SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+
+# Security scheme
+security = HTTPBearer()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -24,7 +28,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
-    # Truncate to 72 bytes (bcrypt limit)
     truncated = password.encode('utf-8')[:72]
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(truncated, salt)
@@ -39,18 +42,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def verify_token(token: str = Header(None, alias="Authorization")):
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
     """Verify JWT token and return user_id."""
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Remove "Bearer " prefix if present
-    if token.startswith("Bearer "):
-        token = token[7:]
+    token = credentials.credentials
     
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

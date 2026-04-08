@@ -1,15 +1,13 @@
 """TaskFlow - AI-Powered Task Manager Backend."""
 
 import logging
-import time
-import traceback
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import RequestResponseEndpoint
-from starlette.responses import Response
+from fastapi.security import HTTPBearer
 
 from lms_backend.database import create_db_and_tables
 from lms_backend.routers import auth, tasks
@@ -21,7 +19,6 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
-    logging.getLogger("uvicorn.access").propagate = True
     yield
 
 
@@ -36,6 +33,7 @@ app = FastAPI(
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
+    import traceback
     tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
     logger.exception("unhandled_exception")
     return JSONResponse(
@@ -46,12 +44,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
             "path": request.url.path,
         },
     )
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next: RequestResponseEndpoint) -> Response:
-    response = await call_next(request)
-    return response
 
 
 app.add_middleware(
